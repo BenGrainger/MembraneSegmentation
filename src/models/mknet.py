@@ -1,5 +1,5 @@
 import torch
-from unet import UNet, ConvPass
+from src.models.unet import UNet, ConvPass
 
 def create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors):
     """

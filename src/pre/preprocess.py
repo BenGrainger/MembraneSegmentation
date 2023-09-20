@@ -1,5 +1,5 @@
 import gunpowder as gp
-from add_local_shape_descriptor import AddLocalShapeDescriptor
+from src.pre.add_local_shape_descriptor import AddLocalShapeDescriptor
 import math
 
 
@@ -54,6 +54,8 @@ def add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights):
             gt_affs,
             affs_weights)
     
+    return pipeline
+    
 def add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights):
 
     pipeline += AddLocalShapeDescriptor(
@@ -62,18 +64,22 @@ def add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights):
         lsds_mask=lsds_weights,
         sigma=80,
         downsample=2)
-
+    
+    return pipeline
 
 def create_lsd_pipeline(sources, raw, labels, gt_lsds, lsds_weights):
     pipeline = initialize_pipeline(sources, raw, labels)
-    add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights)
+    pipeline = add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights)
     pipeline += gp.Unsqueeze([raw])
     pipeline += gp.Stack(1)
+    return pipeline
 
-    
 
 def create_aff_pipeline(sources, raw, labels, gt_affs, affs_weights):
     pipeline = initialize_pipeline(sources, raw, labels)
-    add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights)
+    pipeline = add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights)
     pipeline += gp.Unsqueeze([raw])
     pipeline += gp.Stack(1)
+    return pipeline
+
+
