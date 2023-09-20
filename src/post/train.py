@@ -5,11 +5,11 @@ from tqdm import tqdm
 from src.models.unet import WeightedMSELoss
 from src.utils.utility_funcs import imshow
 
-def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights):
+def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
     pipeline += Train(
             model,
             WeightedMSELoss(),
-                optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
+            optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
             inputs={
                 'input': raw
             },
@@ -20,8 +20,66 @@ def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights):
                 0: pred_affs,
                 1: gt_affs,
                 2: affs_weights
-            })
+            },
+            checkpoint_basename=checkpoint_basename,
+            save_every=save_every,
+            log_every=log_every,
+            log_dir=log_dir)
+    
     return pipeline
+
+
+
+def load_LSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
+    pipeline += Train(
+            model,
+            WeightedMSELoss(),
+            optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
+            inputs={
+                'input': raw
+            },
+            outputs={
+                0: pred_lsds
+            },
+            loss_inputs={
+                0: pred_lsds,
+                1: gt_lsds,
+                2: lsds_weights
+            },
+            checkpoint_basename=checkpoint_basename,
+            save_every=save_every,
+            log_every=log_every,
+            log_dir=log_dir)
+
+    return pipeline
+
+
+
+def load_MTLSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
+    pipeline += Train(
+            model,
+            WeightedMSELoss(),
+            optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
+            inputs={
+                'input': raw
+            },
+            outputs={
+                0: pred_lsds,
+                1: pred_affs
+            },
+            loss_inputs={
+                0: pred_lsds,
+                1: gt_lsds,
+                2: lsds_weights,
+                3: pred_affs,
+                4: gt_affs,
+                5: affs_weights
+            },
+            checkpoint_basename=checkpoint_basename,
+            save_every=save_every,
+            log_every=log_every,
+            log_dir=log_dir)
+
 
 
 def gunpowder_train(request, pipeline, batch_keys, voxel_size, max_iteration=100, test_training=False, show_every=1):
