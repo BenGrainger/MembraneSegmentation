@@ -1,5 +1,6 @@
 import torch
 from src.models.unet import UNet, ConvPass
+import gunpowder as gp
 
 def create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors):
     """
@@ -115,3 +116,17 @@ def create_aclsd_model(num_fmaps, fmap_inc_factor, downsample_factors):
         ConvPass(in_channels=num_fmaps, out_channels=3, kernel_sizes=[[1, 1, 1]], activation='Sigmoid'))
 
     return model
+
+
+
+def return_input_output_sizes(input_shape, voxel_size, model, MTLSD=False):
+    if MTLSD:
+        in_channels = 10
+    else:
+        in_channels = 1
+    model_input = torch.ones([1, in_channels, input_shape[0], input_shape[1], input_shape[2]])
+    outputs = model(model_input)
+    output_shape = gp.Coordinate((outputs.shape[2], outputs.shape[3], outputs.shape[4]))
+    input_size = input_shape * voxel_size
+    output_size = output_shape * voxel_size
+    return input_size, output_size
