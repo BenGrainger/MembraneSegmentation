@@ -129,4 +129,5 @@ def return_input_output_sizes(input_shape, voxel_size, model, MTLSD=False):
     output_shape = gp.Coordinate((outputs.shape[2], outputs.shape[3], outputs.shape[4]))
     input_size = input_shape * voxel_size
     output_size = output_shape * voxel_size
+    
     return input_size, output_size
