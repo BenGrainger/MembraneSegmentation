@@ -127,7 +127,7 @@ def return_input_output_sizes(input_shape, voxel_size, model, MTLSD=False):
     model_input = torch.ones([1, in_channels, input_shape[0], input_shape[1], input_shape[2]])
     outputs = model(model_input)
     output_shape = gp.Coordinate((outputs.shape[2], outputs.shape[3], outputs.shape[4]))
-    input_size = input_shape * voxel_size
+    input_size = gp.Coordinate(input_shape) * voxel_size
     output_size = output_shape * voxel_size
     
     return input_size, output_size

@@ -17,7 +17,7 @@ pred_affs = gp.ArrayKey('PRED_AFFS')
 
 batch_dict = {'RAW': raw, 'LABELS': labels, 'GT_AFFS': gt_affs, 'AFFS_WEIGHTS': affs_weights, 'PRED_AFFS': pred_affs}
 
-parent_dir = r"U://zoo/users/beng/automatic_segmentation/LSD/data3D"
+parent_dir = r"U://users/beng/automatic_segmentation/LSD/data3D"
 data_dir_list = ["trainA.zarr", "trainB.zarr"]
 
 sources  = dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list)

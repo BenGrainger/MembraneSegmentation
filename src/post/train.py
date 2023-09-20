@@ -1,11 +1,12 @@
 import gunpowder as gp
+from gunpowder.torch import Train
 import torch
 from tqdm import tqdm
 from src.models.unet import WeightedMSELoss
 from src.utils.utility_funcs import imshow
 
 def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights):
-    pipeline += gp.Train(
+    pipeline += Train(
             model,
             WeightedMSELoss(),
                 optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
@@ -23,7 +24,7 @@ def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights):
     return pipeline
 
 
-def gunpowder_train(request, pipeline, batch, batch_keys, voxel_size, max_iteration=100, test_training=False, show_every=1):
+def gunpowder_train(request, pipeline, batch_keys, voxel_size, max_iteration=100, test_training=False, show_every=1):
 
     # affinity channels
     aff_channels = {'affs1': 0,
