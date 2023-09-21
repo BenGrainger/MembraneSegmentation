@@ -1,6 +1,7 @@
 {
     "parent_dir":  "U://users/beng/automatic_segmentation/LSD/data3D",
     "data_dir_list": {"data1": "trainA.zarr","data2": "trainB.zarr"},
+    "validation_dir": "trainA.zarr",
     "out_directory":  "U://users/beng/models/affinities/test",
     "zxy": [84, 268, 268],
     "voxel_dimensions": [4, 4, 40],

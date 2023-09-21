@@ -74,6 +74,26 @@ def dataloader_zarr3D(raw, labels, dir):
 
 
 
+def dataloader_zarr3Dpredict(raw, dir):
+    """ provides 3D arrays from the zarr container, in other words creates the source for the pipeline
+    Args:
+
+        raw: (gp.Arraykey)
+
+        dir: (str)
+    """
+    source = gp.ZarrSource(
+        dir,
+        {
+            raw: '/raw'
+        },
+        {
+            raw: gp.ArraySpec(interpolatable=True)
+        }
+        )
+    return source
+
+
 
 def dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list): 
     """ provides 3D arrays from multiple zarr containers, in other words creates the source for the pipeline

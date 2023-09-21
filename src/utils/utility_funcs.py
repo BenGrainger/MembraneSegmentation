@@ -2,6 +2,7 @@ import gunpowder as gp
 import matplotlib.pyplot as plt
 import numpy as np
 
+def find_latest_checkpoint():
 
 def create_lut(labels):
 
