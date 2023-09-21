@@ -2,6 +2,17 @@ import gunpowder as gp
 
 
 def dataloader_zarr2D(raw, labels, dir, num_samples):
+    """ provides 2D arrays from the zarr container, in other words creates the source for the pipeline
+    Args:
+
+        raw: (gp.Arraykey)
+
+        labels: (gp.Arraykey)
+
+        dir: (str)
+
+        num_samples: (int) number of samples per batch
+    """
     sources = tuple(
     gp.ZarrSource(
         dir,  
@@ -28,6 +39,16 @@ def dataloader_zarr2D(raw, labels, dir, num_samples):
 
 
 def dataloader_zarr3D(raw, labels, dir): 
+    """ provides 3D arrays from the zarr container, in other words creates the source for the pipeline
+    Args:
+
+        raw: (gp.Arraykey)
+
+        labels: (gp.Arraykey)
+
+        dir: (str)
+
+    """
     source = gp.ZarrSource(
         dir,
         {
@@ -55,6 +76,17 @@ def dataloader_zarr3D(raw, labels, dir):
 
 
 def dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list): 
+    """ provides 3D arrays from multiple zarr containers, in other words creates the source for the pipeline
+    Args:
+
+        raw: (gp.Arraykey)
+
+        labels: (gp.Arraykey)
+
+        parent_dir: (str)
+
+        data_dir_list: (list) list of the zarr file names
+    """
     sources = tuple(
             # read batches from the Zarr file
             gp.ZarrSource(

@@ -3,7 +3,7 @@ from src.models.unet import UNet, ConvPass
 import gunpowder as gp
 
 def create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors):
-    """
+    """ returns a pytorch implementation of the unet based affinities model (untrained)
     Args:
 
             num_fmaps:
@@ -43,7 +43,7 @@ def create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors):
 
 
 def create_lsd_model(num_fmaps, fmap_inc_factor, downsample_factors):
-    """
+    """ returns a pytorch implementation of the unet based LSD model (untrained)
     Args:
 
             num_fmaps:
@@ -81,8 +81,8 @@ def create_lsd_model(num_fmaps, fmap_inc_factor, downsample_factors):
 
 
 
-def create_aclsd_model(num_fmaps, fmap_inc_factor, downsample_factors):
-    """
+def create_MTLSD_model(num_fmaps, fmap_inc_factor, downsample_factors):
+    """ returns a pytorch implementation of the unet based MTLSD model (untrained)
     Args:
 
             num_fmaps:
@@ -120,6 +120,17 @@ def create_aclsd_model(num_fmaps, fmap_inc_factor, downsample_factors):
 
 
 def return_input_output_sizes(input_shape, voxel_size, model, MTLSD=False):
+    """ returns the input and output size of the model in gp.Coordinates. Used to request/specify batches/arrays of certain sizes
+    Args:
+
+            input_shape: (list) e.g. [z, x, y] no batch or channel size
+
+            voxel_size: (gp.Coordinate) e.g. gp.Coordinate((40, 4, 4)) 
+
+            model: pytorch model 
+
+            MTLSD: (bool)
+    """
     if MTLSD:
         in_channels = 10
     else:

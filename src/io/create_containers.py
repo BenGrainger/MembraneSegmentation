@@ -1,7 +1,7 @@
 import zarr
 
 def create_zarr_container_2D(raw, segmentation, destination_folder, offset, resolution):
-    """
+    """ save numpy arrays for both the raw and segmentation into the zarr file fomat as a list of 2D arrays
     Args:
 
         raw: (numpy array)
@@ -39,7 +39,7 @@ def create_zarr_container_2D(raw, segmentation, destination_folder, offset, reso
 
 def create_zarr_container_2D(raw, segmentation, destination_folder, offset, resolution):
     """
-    Args:
+    Args:save numpy arrays for both the raw and segmentation into the zarr file fomat each as a single 3D array
 
         raw: (numpy array)
 
