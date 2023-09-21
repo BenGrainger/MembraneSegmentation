@@ -1,8 +1,25 @@
 import gunpowder as gp
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
-def find_latest_checkpoint():
+def find_latest_checkpoint(checkpoint_path):
+    """ returns the path for the highest checkpoint
+    Args:
+
+        checkpoint_path: (str)
+    """
+    checkpoint_list = os.listdir(checkpoint_path)
+    def return_int_in_name(name):
+        """
+        name: (str)
+        """
+        parts = name.split('_')
+        return int(parts[2])
+    int_list = [return_int_in_name(i) for i in checkpoint_list]
+    max_checkpoint= np.max(np.array(int_list))
+    max_checkpoint_name = [i for i in checkpoint_list if str(max_checkpoint) in i][0]
+    return os.path.join(checkpoint_path, max_checkpoint_name)
 
 def create_lut(labels):
 

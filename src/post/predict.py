@@ -43,10 +43,12 @@ def get_input_output_roi(source, raw, input_size, output_size):
     return total_input_roi, total_output_roi
 
 
-def predict_pipeline(model, raw, pred_outs, input_size, output_size, checkpoint):
+def predict_pipeline(source, model, raw, pred_outs, input_size, output_size, checkpoint):
     """ create prediction pipeline
     Args:
 
+        source:
+        
         model:
 
         raw:
@@ -64,7 +66,7 @@ def predict_pipeline(model, raw, pred_outs, input_size, output_size, checkpoint)
 
     scan_request.add(raw, input_size)
 
-    for i in pred_outs.values:
+    for i in pred_outs.values():
         scan_request.add(i, output_size)
 
     # set model to eval mode
@@ -75,7 +77,7 @@ def predict_pipeline(model, raw, pred_outs, input_size, output_size, checkpoint)
 
     scan = gp.Scan(scan_request)
 
-    pipeline = gp.source
+    pipeline = source
     pipeline += gp.Normalize(raw)
 
     # raw shape = h,w
@@ -95,7 +97,7 @@ def predict_pipeline(model, raw, pred_outs, input_size, output_size, checkpoint)
     # raw shape = c,h,w
     # pred shape = b,c,h,w
 
-    squeeze_inputs = [raw] + [i for i in pred_outs.values]
+    squeeze_inputs = [raw] + [i for i in pred_outs.values()]
     pipeline += gp.Squeeze(squeeze_inputs)
 
     # raw shape = h,w

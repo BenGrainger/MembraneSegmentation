@@ -1,4 +1,3 @@
-#%%
 import gunpowder as gp
 import sys
 import json
@@ -86,4 +85,3 @@ request.add(pred_affs, output_size)
 
 print('train model')
 gunpowder_train(request, pipeline, batch_dict, voxel_size, max_iteration=10, test_training=True, show_every=1)
-# %%

@@ -1,4 +1,3 @@
-#%%
 import gunpowder as gp
 import sys
 import json
@@ -19,7 +18,7 @@ with open(config_path, 'r') as config_file:
 print('establishing parameters')
 parent_dir = config['parent_dir'] 
 validation_dir = config["validation_dir"]
-os.path.join(parent_dir, validation_dir)
+validation_path = os.path.join(parent_dir, validation_dir)
 
 # Array keys for gunpowder interface
 raw = gp.ArrayKey('RAW')
@@ -39,7 +38,7 @@ ds1, ds2, ds3 = config["downsample_factors"]
 downsample_factors=[(1,ds1,ds1),(1,ds2,ds2),(1,ds3,ds3)] # 1 in the z due to datasets being non isotropic in z
 
 print('creating val data source')
-source  = dataloader_zarr3Dpredict(raw, parent_dir)
+source  = dataloader_zarr3Dpredict(raw, validation_path)
 
 print('creating model')
 model_aff  = create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors)
@@ -49,7 +48,7 @@ print('creating predict pipeline')
 pred_outs = {0: pred_affs}
 out_dir = config["out_directory"]
 checkpoint = find_latest_checkpoint(out_dir + "/checkpoints")
-pipeline = predict_pipeline(model_aff, raw, pred_outs, input_size, output_size, checkpoint)
+pipeline = predict_pipeline(source, model_aff, raw, pred_outs, input_size, output_size, checkpoint)
 total_input_roi, total_output_roi = get_input_output_roi(source, raw, input_size, output_size)
 
 print('request batch')
@@ -59,5 +58,4 @@ predict_request.add(pred_affs, total_output_roi.get_end())
 
 with gp.build(pipeline):
     batch = pipeline.request_batch(predict_request)
-
 
