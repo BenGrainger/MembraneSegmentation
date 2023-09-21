@@ -3,8 +3,16 @@ from src.pre.add_local_shape_descriptor import AddLocalShapeDescriptor
 import math
 
 
-def initialize_pipeline(sources, raw, labels):
+def initialize_training_pipeline(sources, raw, labels):
+    """ create and add source to pipeline as well as add ubiquitous augmentation steps
+    Args:
 
+        sources: source already established with dataloaders
+
+        raw: (gp.Arraykey)
+
+        labels: (gp.Arraykey)
+    """
     pipeline = sources
 
     # randomly choose a sample from our tuple of samples - this is absolutely necessary to be able to get any data!
@@ -41,7 +49,18 @@ def initialize_pipeline(sources, raw, labels):
 
 
 def add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights):
+    """ add steps required for affinity pipeline
+    Args:
 
+        pipeline: 
+
+        labels: (gp.Arraykey)
+
+        gt_affs: (gp.Arraykey)
+
+        affs_weights: (gp.Arraykey)
+    
+    """
     pipeline += gp.AddAffinities(
         affinity_neighborhood=[[-1, 0, 0], [0, -1, 0], [0, 0, -1]],
         labels=labels,
@@ -57,7 +76,17 @@ def add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights):
     return pipeline
     
 def add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights):
+    """ add steps required for lsd pipeline
+    Args:
 
+        pipeline: 
+
+        labels: (gp.Arraykey)
+
+        gt_lsds: (gp.Arraykey)
+
+        lsds_weights: (gp.Arraykey)
+    """
     pipeline += AddLocalShapeDescriptor(
         labels,
         gt_lsds,
@@ -67,16 +96,71 @@ def add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights):
     
     return pipeline
 
-def create_lsd_pipeline(sources, raw, labels, gt_lsds, lsds_weights):
-    pipeline = initialize_pipeline(sources, raw, labels)
+def create_lsd_preprocess_pipeline(sources, raw, labels, gt_lsds, lsds_weights):
+    """ create the full lsd pipeline
+    Args:
+
+        sources: data source established with dataloaders
+
+        raw: (gp.Arraykey)
+
+        pred_lsds: (gp.Arraykey)
+
+        gt_lsds: (gp.Arraykey)
+
+        lsds_weights: (gp.Array)
+    """
+    pipeline = initialize_training_pipeline(sources, raw, labels)
     pipeline = add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights)
     pipeline += gp.Unsqueeze([raw])
     pipeline += gp.Stack(1)
     return pipeline
 
 
-def create_aff_pipeline(sources, raw, labels, gt_affs, affs_weights):
-    pipeline = initialize_pipeline(sources, raw, labels)
+def create_affinity_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weights):
+    """ create the full aff pipeline
+    Args:
+
+        sources: data source established with dataloaders
+        
+        raw: (gp.Arraykey)
+
+        pred_affs: (gp.Arraykey)
+
+        gt_affs: (gp.Arraykey)
+
+        affs_weights: (gp.Arraykey)
+    
+    """
+    pipeline = initialize_training_pipeline(sources, raw, labels)
+    pipeline = add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights)
+    pipeline += gp.Unsqueeze([raw])
+    pipeline += gp.Stack(1)
+    return pipeline
+
+def create_mtlsd_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weights, gt_lsds, lsds_weights):
+    """ create the full MTLSD pipeline
+    Args:
+
+    sources: data source established with dataloaders
+
+    raw: (gp.Arraykey)
+
+    pred_lsds: (gp.Arraykey)
+
+    gt_lsds: (gp.Arraykey)
+
+    lsds_weights: (gp.Array)
+
+    pred_affs: (gp.Arraykey)
+
+    gt_affs: (gp.Arraykey)
+
+    affs_weights: (gp.Arraykey)
+    
+    """
+    pipeline = initialize_training_pipeline(sources, raw, labels)
+    pipeline = add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights)
     pipeline = add_affinity_pipeline(pipeline, labels, gt_affs, affs_weights)
     pipeline += gp.Unsqueeze([raw])
     pipeline += gp.Stack(1)

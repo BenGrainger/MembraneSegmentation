@@ -6,6 +6,25 @@ from src.models.unet import WeightedMSELoss
 from src.utils.utility_funcs import imshow
 
 def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
+    """ load affinity model into the pipeline. Each iteration of pipeline will lead to a successive training step.
+    Args:
+
+        pipeline: pipeline for training step to be added to
+
+        model: pytorch model
+
+        raw: (gp.Arraykey)
+
+        pred_affs: (gp.Arraykey)
+
+        gt_affs: (gp.Arraykey)
+
+        affs_weights: (gp.Arraykey)
+
+        checkpoint_basename: (str)
+
+        log_dir: (str)
+    """
     pipeline += Train(
             model,
             WeightedMSELoss(),
@@ -31,6 +50,25 @@ def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights, 
 
 
 def load_LSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
+    """ load LSD model into the pipeline. Each iteration of pipeline will lead to a successive training step.
+    Args:
+
+        pipeline: pipeline for training step to be added to
+
+        model: pytorch model
+
+        raw: (gp.Arraykey)
+
+        pred_lsds: (gp.Arraykey)
+
+        gt_lsds: (gp.Arraykey)
+
+        lsds_weights: (go.Array)
+
+        checkpoint_basename: (str)
+
+        log_dir: (str)
+    """
     pipeline += Train(
             model,
             WeightedMSELoss(),
@@ -56,6 +94,31 @@ def load_LSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, check
 
 
 def load_MTLSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
+    """ load MTLSD model into the pipeline. Each iteration of pipeline will lead to a successive training step.
+    Args:
+
+        pipeline: pipeline for training step to be added to
+
+        model: pytorch model
+
+        raw: (gp.Arraykey)
+
+        pred_lsds: (gp.Arraykey)
+
+        gt_lsds: (gp.Arraykey)
+
+        lsds_weights: (gp.Array)
+
+        pred_affs: (gp.Arraykey)
+
+        gt_affs: (gp.Arraykey)
+
+        affs_weights: (gp.Arraykey)
+
+        checkpoint_basename: (str)
+
+        log_dir: (str)
+    """
     pipeline += Train(
             model,
             WeightedMSELoss(),
@@ -83,12 +146,23 @@ def load_MTLSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, pre
 
 
 def gunpowder_train(request, pipeline, batch_keys, voxel_size, max_iteration=100, test_training=False, show_every=1):
+    """ train model with gunpowder api
+    Args:
+
+        request: request for batch(s) via gunpowder api
+
+        pipeline: 
+
+        batch_keys: (dict) dictionary containing the gp.Arraykeys for easier access
+
+        voxel_size: (gp.Coordinate) e.g. gp.Coordinate((40, 4, 4)) 
+    """
 
     # affinity channels
     aff_channels = {'affs1': 0,
                     'affs2': 1,
                     'affs3': 2}
-
+    
     # lsd channels dict
     lsd_channels = {
         'offset (y)': 0,
@@ -96,8 +170,7 @@ def gunpowder_train(request, pipeline, batch_keys, voxel_size, max_iteration=100
         'orient (y)': 2,
         'orient (x)': 3,
         'yx change': 4,
-        'voxel count': 5
-    }
+        'voxel count': 5}
 
     with gp.build(pipeline):
         progress = tqdm(range(max_iteration))

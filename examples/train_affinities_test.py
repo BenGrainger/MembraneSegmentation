@@ -4,7 +4,7 @@ import sys
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 
 from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.preprocess import create_aff_pipeline
+from src.pre.preprocess import create_affinity_preprocess_pipeline
 from src.models.mknet import create_affinity_model, return_input_output_sizes
 from src.post.train import load_affinity_model, gunpowder_train
 
@@ -21,7 +21,7 @@ parent_dir = r"U://users/beng/automatic_segmentation/LSD/data3D"
 data_dir_list = ["trainA.zarr", "trainB.zarr"]
 
 sources  = dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list)
-pipeline = create_aff_pipeline(sources, raw, labels, gt_affs, affs_weights)
+pipeline = create_affinity_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weights)
 
 model_aff  = create_affinity_model(12, 6, [[2,2,3]])
 input_shape = [84, 268, 268]
