@@ -42,7 +42,7 @@ def create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors):
 
 
 
-def create_lsd_model(num_fmaps, fmap_inc_factor, downsample_factors):
+def create_LSD_model(num_fmaps, fmap_inc_factor, downsample_factors):
     """ returns a pytorch implementation of the unet based LSD model (untrained)
     Args:
 

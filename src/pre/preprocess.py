@@ -96,7 +96,7 @@ def add_lsd_pipeline(pipeline, labels, gt_lsds, lsds_weights):
     
     return pipeline
 
-def create_lsd_preprocess_pipeline(sources, raw, labels, gt_lsds, lsds_weights):
+def create_LSD_preprocess_pipeline(sources, raw, labels, gt_lsds, lsds_weights):
     """ create the full lsd pipeline
     Args:
 
@@ -138,7 +138,7 @@ def create_affinity_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weig
     pipeline += gp.Stack(1)
     return pipeline
 
-def create_mtlsd_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weights, gt_lsds, lsds_weights):
+def create_MTLSD_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weights, gt_lsds, lsds_weights):
     """ create the full MTLSD pipeline
     Args:
 
