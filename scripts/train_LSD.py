@@ -5,9 +5,10 @@ import os
 
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.preprocess import preprocessing_pipeline
+from src.pre.pipeline import preprocessing_pipeline
 from src.models.mknet import mknet
-from src.post.train import load_LSD_model, gunpowder_train
+from src.post.train import train
+
 
 print('loading config')
 config_path = 'config/LSD_config.json'
@@ -69,17 +70,13 @@ print('creating data pipeline')
 pipeline = preprocessing_pipeline(sources, raw, labels, None)
 pipeline.create_pipeline()
 pipeline.add_lsd_pipeline(gt_lsds, lsds_weights)
-pipeline.add_final_pipeline()
-pipeline = pipeline.get_pipeline()
+pipeline.add_final_prepprocess_pipeline()
 
 print('creating model')
 lsd_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
 lsd_model.create_LSD_model()
 input_size, output_size = lsd_model.return_input_output_sizes(input_shape, voxel_size)
 lsd_model = lsd_model.get_model()
-
-print('load model into pipeline')
-pipeline = load_LSD_model(pipeline, lsd_model, raw, pred_lsds, gt_lsds, lsds_weights, checkpoint_basename, log_dir, save_every=1, log_every=1)
 
 print('request batch')
 request = gp.BatchRequest()
@@ -89,7 +86,15 @@ request.add(gt_lsds, output_size)
 request.add(lsds_weights, output_size)
 request.add(pred_lsds, output_size)
 
+print('load model into pipeline')
+outputs = [pred_lsds]
+loss_inputs = [pred_lsds, gt_lsds, lsds_weights]
+pipeline.add_model(lsd_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1, log_every=1)
+
+pipeline = pipeline.get_pipeline()
+
 print('train model')
-gunpowder_train(request, pipeline, batch_dict, voxel_size, max_iteration=10, test_training=True, show_every=1)
+train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10, test_training=False, show_every=1)
+
 
 

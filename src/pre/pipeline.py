@@ -1,6 +1,9 @@
 import gunpowder as gp
 from src.pre.add_local_shape_descriptor import AddLocalShapeDescriptor
 import math
+from gunpowder.torch import Train
+import torch
+from src.models.unet import WeightedMSELoss, MTLSDWeightedMSELoss
 
 class preprocessing_pipeline(object):
     def __init__(self, source, raw, labels, pipeline):
@@ -104,11 +107,62 @@ class preprocessing_pipeline(object):
             sigma=80,
             downsample=2)
 
-        
 
-    def add_final_pipeline(self):
+    def add_final_prepprocess_pipeline(self):
         self.pipeline += gp.Unsqueeze([self.raw])
         self.pipeline += gp.Stack(1)
+
+    def add_model(self, model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10, MTLSD=False):
+        """ load model into the pipeline. Each iteration of pipeline will lead to a successive training step.
+        Args:
+
+            pipeline: pipeline for training step to be added to
+
+            model: pytorch model
+
+            raw: (gp.Arraykey)
+
+            outputs: (list) converted to this format e.g. outputs={0: pred_lsds}
+
+            loss_inputs: (list) e.g. converted to this fommat loss_inputs={
+                                                0: pred,
+                                                1: gt,
+                                                2: weights,...
+                                            }
+
+            checkpoint_basename: (str)
+
+            log_dir: (str)
+
+        """
+        def create_dict(to_be_dct):
+            """ turn arrays into proper format
+            to_be_dct: (list) of arrays
+            """
+            dictionary = {}
+            for i, array in enumerate(to_be_dct):
+                dictionary[i] = array
+            return dictionary
+    
+        if MTLSD:
+            loss = MTLSDWeightedMSELoss()
+        else:
+            loss = WeightedMSELoss()
+
+
+        self.pipeline += Train(
+                model,
+                loss=loss,
+                optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
+                inputs={
+                    'input': raw
+                },
+                outputs=create_dict(outputs),
+                loss_inputs=create_dict(loss_inputs),
+                checkpoint_basename=checkpoint_basename,
+                save_every=save_every,
+                log_every=log_every,
+                log_dir=log_dir)
 
 
 

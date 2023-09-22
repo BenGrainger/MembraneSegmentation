@@ -4,7 +4,7 @@ import sys
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 
 from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.preprocess import create_affinity_preprocess_pipeline
+from src.pre.pipeline import create_affinity_preprocess_pipeline
 from src.models.mknet import create_affinity_model, return_input_output_sizes
 from src.post.train import load_affinity_model, gunpowder_train
 

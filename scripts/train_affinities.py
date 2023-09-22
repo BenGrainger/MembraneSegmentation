@@ -5,9 +5,9 @@ import os
 
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.preprocess import preprocessing_pipeline
+from src.pre.pipeline import preprocessing_pipeline
 from src.models.mknet import mknet
-from src.post.train import load_affinity_model, gunpowder_train
+from src.post.train import train
 
 print('loading config')
 config_path = 'config/affinities_config.json'
@@ -70,17 +70,12 @@ pipeline = preprocessing_pipeline(sources, raw, labels, pipeline=None)
 pipeline.create_pipeline()
 pipeline.add_affinity_pipeline(gt_affs, affs_weights)
 pipeline.add_final_pipeline()
-pipeline = pipeline.get_pipeline()
-
 
 print('creating model')
 aff_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
 aff_model.create_affinity_model()
 input_size, output_size = aff_model.return_input_output_sizes(input_shape, voxel_size)
 aff_model = aff_model.get_model()
-
-print('load model into pipeline')
-pipeline = load_affinity_model(pipeline, aff_model, raw, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1, log_every=1)
 
 print('request batch')
 request = gp.BatchRequest()
@@ -90,7 +85,12 @@ request.add(gt_affs, output_size)
 request.add(affs_weights, output_size)
 request.add(pred_affs, output_size)
 
+print('load model into pipeline')
+outputs = [pred_affs]
+loss_inputs = [pred_affs, gt_affs, affs_weights]
+pipeline.add_model(aff_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1, log_every=1)
+
+pipeline = pipeline.get_pipeline()
+
 print('train model')
-gunpowder_train(request, pipeline, batch_dict, voxel_size, max_iteration=10, test_training=True, show_every=1)
-
-
+train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10, test_training=False, show_every=1)
