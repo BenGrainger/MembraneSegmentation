@@ -1,26 +1,6 @@
 from gunpowder.torch import Predict
 import gunpowder as gp
 
-def predict_node(model, raw, pred_outs, checkpoint):
-    """ create a predict node for MTLSD models
-    Args:
-
-        raw: (gp.Arraykey)
-
-        pred_outs: (dict) dictionary of iterated predicted gp.Arraykeys placeholders depending on the model e.g. {0: pred_lsds, 1; pred_affs}
-
-        checkpoint: (str)
-    """
-    predict = Predict(
-        model=model,
-        checkpoint=checkpoint,
-        inputs = {
-                'input': raw
-        },
-        outputs = pred_outs)
-    
-    return predict
-
 
 def get_input_output_roi(source, raw, input_size, output_size):
     """ in order to scan over the entire dataset the total input and output sizes must be known - these are returned here
@@ -43,64 +23,88 @@ def get_input_output_roi(source, raw, input_size, output_size):
     return total_input_roi, total_output_roi
 
 
-def predict_pipeline(source, model, raw, pred_outs, input_size, output_size, checkpoint):
-    """ create prediction pipeline
-    Args:
 
-        source:
+class predict_pipeline(object):
+    def __init__(self, source, model, raw, pred_outs, input_size, output_size, checkpoint):
+        """ create a predict pipeline
+        Args:
+
+            source:
+
+            model: pytorch model
+
+            raw: (gp.Arraykey)
+
+            pred_outs: (dict) dictionary of iterated predicted gp.Arraykeys placeholders depending on the model e.g. {0: pred_lsds, 1; pred_affs}
+
+            checkpoint: (str)
+
+            input_size: 
+        """
+        self.source = source
+        self.model = model
+        self.raw = raw
+        self.pred_outs = pred_outs
+        self.checkpoint = checkpoint
+        self.input_size = input_size
+        self.output_size = output_size
+
+    def create_pipeline(self):
         
-        model:
+        # request prediction batch
+        scan_request = gp.BatchRequest()
 
-        raw:
+        scan_request.add(self.raw, self.input_size)
 
-        pred_outs: (dict) dictionary of iterated predicted gp.Arraykeys placeholders depending on the model e.g. {0: pred_lsds, 1; pred_affs}
+        for i in self.pred_outs.values():
+            scan_request.add(i, self.output_size)
 
-        input_size:
+        # set model to eval mode
+        self.model.eval()
 
-        output_size:
+        # add a predict node
+        predict = self.return_predict_node()
 
-        checkpoint: 
-    """
-    # request prediction batch
-    scan_request = gp.BatchRequest()
+        scan = gp.Scan(scan_request)
 
-    scan_request.add(raw, input_size)
+        pipeline = self.source
+        pipeline += gp.Normalize(self.raw)
 
-    for i in pred_outs.values():
-        scan_request.add(i, output_size)
+        # raw shape = h,w
 
-    # set model to eval mode
-    model.eval()
+        pipeline += gp.Unsqueeze([self.raw])
 
-    # add a predict node
-    predict = predict_node(model, raw, pred_outs, checkpoint)
+        # raw shape = c,h,w
 
-    scan = gp.Scan(scan_request)
+        pipeline += gp.Stack(1)
 
-    pipeline = source
-    pipeline += gp.Normalize(raw)
+        # raw shape = b,c,h,w
 
-    # raw shape = h,w
+        pipeline += predict
+        pipeline += scan
+        pipeline += gp.Squeeze([self.raw])
 
-    pipeline += gp.Unsqueeze([raw])
+        # raw shape = c,h,w
+        # pred shape = b,c,h,w
 
-    # raw shape = c,h,w
+        squeeze_inputs = [self.raw] + [i for i in self.pred_outs.values()]
+        pipeline += gp.Squeeze(squeeze_inputs)
 
-    pipeline += gp.Stack(1)
+        # raw shape = h,w
+        # pred shape = c,h,w
 
-    # raw shape = b,c,h,w
+        return pipeline
 
-    pipeline += predict
-    pipeline += scan
-    pipeline += gp.Squeeze([raw])
+    def return_predict_node(self):
+        predict = Predict(
+            model=self.model,
+            checkpoint=self.checkpoint,
+            inputs = {
+                    'input': self.raw
+            },
+            outputs = self.pred_outs)
+        
+        return predict
 
-    # raw shape = c,h,w
-    # pred shape = b,c,h,w
 
-    squeeze_inputs = [raw] + [i for i in pred_outs.values()]
-    pipeline += gp.Squeeze(squeeze_inputs)
 
-    # raw shape = h,w
-    # pred shape = c,h,w
-
-    return pipeline

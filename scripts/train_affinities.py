@@ -5,8 +5,8 @@ import os
 
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.preprocess import create_affinity_preprocess_pipeline
-from src.models.mknet import create_affinity_model, return_input_output_sizes
+from src.pre.preprocess import preprocessing_pipeline
+from src.models.mknet import mknet
 from src.post.train import load_affinity_model, gunpowder_train
 
 print('loading config')
@@ -63,17 +63,24 @@ check_folder_exists(log_dir)
 batch_dict = {'RAW': raw, 'LABELS': labels, 'GT_AFFS': gt_affs, 'AFFS_WEIGHTS': affs_weights, 'PRED_AFFS': pred_affs}
 
 print('creating data source')
-sources  = dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list)
+sources = dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list)
 
 print('creating data pipeline')
-pipeline = create_affinity_preprocess_pipeline(sources, raw, labels, gt_affs, affs_weights)
+pipeline = preprocessing_pipeline(sources, raw, labels, pipeline=None)
+pipeline.create_pipeline()
+pipeline.add_affinity_pipeline(gt_affs, affs_weights)
+pipeline.add_final_pipeline()
+pipeline = pipeline.get_pipeline()
+
 
 print('creating model')
-model_aff  = create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors)
-input_size, output_size = return_input_output_sizes(input_shape, voxel_size, model_aff)
+aff_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
+aff_model.create_affinity_model()
+input_size, output_size = aff_model.return_input_output_sizes(input_shape, voxel_size)
+aff_model = aff_model.get_model()
 
 print('load model into pipeline')
-pipeline = load_affinity_model(pipeline, model_aff, raw, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1, log_every=1)
+pipeline = load_affinity_model(pipeline, aff_model, raw, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1, log_every=1)
 
 print('request batch')
 request = gp.BatchRequest()
@@ -85,3 +92,5 @@ request.add(pred_affs, output_size)
 
 print('train model')
 gunpowder_train(request, pipeline, batch_dict, voxel_size, max_iteration=10, test_training=True, show_every=1)
+
+

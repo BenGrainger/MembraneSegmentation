@@ -2,7 +2,7 @@ import gunpowder as gp
 from gunpowder.torch import Train
 import torch
 from tqdm import tqdm
-from src.models.unet import WeightedMSELoss
+from src.models.unet import WeightedMSELoss, MTLSDWeightedMSELoss
 from src.utils.utility_funcs import imshow
 
 def load_affinity_model(pipeline, model, raw, pred_affs, gt_affs, affs_weights, checkpoint_basename, log_dir, save_every=1000, log_every=10):
@@ -121,7 +121,7 @@ def load_MTLSD_model(pipeline, model, raw, pred_lsds, gt_lsds, lsds_weights, pre
     """
     pipeline += Train(
             model,
-            WeightedMSELoss(),
+            MTLSDWeightedMSELoss(),
             optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
             inputs={
                 'input': raw
