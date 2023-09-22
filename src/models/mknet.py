@@ -65,10 +65,7 @@ class mknet(object):
     def create_LSD_model(self):
         self.create_model(1, 10)
 
-    def create_MTLSD_model(self):
-        self.create_model(10, 3)
-
-    def return_input_output_sizes(self, input_shape, voxel_size, MTLSD=False):
+    def return_input_output_sizes(self, input_shape, voxel_size):
         """ returns the input and output size of the model in gp.Coordinates. Used to request/specify batches/arrays of certain sizes
         Args:
 
@@ -78,13 +75,8 @@ class mknet(object):
 
                 model: pytorch model 
 
-                MTLSD: (bool)
         """
-        if MTLSD:
-            in_channels = 10
-        else:
-            in_channels = 1
-        model_input = torch.ones([1, in_channels, input_shape[0], input_shape[1], input_shape[2]])
+        model_input = torch.ones([1, 1, input_shape[0], input_shape[1], input_shape[2]])
         outputs = self.model(model_input)
         output_shape = gp.Coordinate((outputs.shape[2], outputs.shape[3], outputs.shape[4]))
         input_size = gp.Coordinate(input_shape) * voxel_size
@@ -93,4 +85,54 @@ class mknet(object):
         return input_size, output_size
 
 
+class MtlsdModel(torch.nn.Module):
 
+    def __init__(
+        self,
+        num_fmaps,
+        fmap_inc_factor,
+        downsample_factors):
+  
+        super().__init__()
+
+        # create unet
+        self.unet = UNet(
+          in_channels=1,
+          num_fmaps=num_fmaps,
+          fmap_inc_factor=fmap_inc_factor,
+          downsample_factors=downsample_factors,
+          constant_upsample=True)
+
+        # create lsd and affs heads
+        self.lsd_head = ConvPass(num_fmaps, 10, [[1, 1, 1]], activation='Sigmoid')
+        self.aff_head = ConvPass(num_fmaps, 3, [[1, 1, 1]], activation='Sigmoid')
+
+    def forward(self, input):
+
+        # pass raw through unet
+        z = self.unet(input)
+
+        # pass output through heads
+        lsds = self.lsd_head(z)
+        affs = self.aff_head(z)
+
+        return lsds, affs
+    
+    def return_input_output_sizes(self, input_shape, voxel_size):
+        """ returns the input and output size of the model in gp.Coordinates. Used to request/specify batches/arrays of certain sizes
+        Args:
+
+                input_shape: (list) e.g. [z, x, y] no batch or channel size
+
+                voxel_size: (gp.Coordinate) e.g. gp.Coordinate((40, 4, 4)) 
+
+                model: pytorch model 
+
+        """
+        model_input = torch.ones([1, 1, input_shape[0], input_shape[1], input_shape[2]])
+        outputs = self.forward(model_input)
+        output_shape = gp.Coordinate((outputs[0].shape[2], outputs[0].shape[3], outputs[0].shape[4]))
+        input_size = gp.Coordinate(input_shape) * voxel_size
+        output_size = output_shape * voxel_size
+        
+        return input_size, output_size

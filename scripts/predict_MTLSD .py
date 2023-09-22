@@ -5,12 +5,12 @@ import os
 
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 from src.io.dataloaders import dataloader_zarr3Dpredict
-from src.models.mknet import mknet
+from src.models.mknet import MtlsdModel
 from src.post.predict import predict_pipeline, get_input_output_roi
 from src.utils.utility_funcs import find_latest_checkpoint
 
 print('loading config')
-config_path = 'config/LSD_config.json'
+config_path = 'config/MTLSD_config.json'
 
 with open(config_path, 'r') as config_file:
     config = json.load(config_file)
@@ -23,6 +23,7 @@ validation_path = os.path.join(parent_dir, validation_dir)
 # Array keys for gunpowder interface
 raw = gp.ArrayKey('RAW')
 pred_lsds = gp.ArrayKey('PRED_LSDS')
+pred_affs = gp.ArrayKey('PRED_AFFS')
 
 # data parameters
 z, x, y = config["zxy"]
@@ -39,24 +40,22 @@ downsample_factors=[(1,ds1,ds1),(1,ds2,ds2),(1,ds3,ds3)] # 1 in the z due to dat
 
 print('creating val data source')
 source  = dataloader_zarr3Dpredict(raw, validation_path)
-
 print('creating model')
-lsd_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
-lsd_model.create_LSD_model()
-input_size, output_size = lsd_model.return_input_output_sizes(input_shape, voxel_size)
-lsd_model = lsd_model.get_model()
+
+mtlsd_model = MtlsdModel( num_fmaps, fmap_inc_factor, downsample_factors)
+input_size, output_size = mtlsd_model.return_input_output_sizes(input_shape, voxel_size)
 
 print('creating predict pipeline')
 pred_outs = {0: pred_lsds}
 out_dir = config["out_directory"]
 checkpoint = find_latest_checkpoint(out_dir + "/checkpoints")
-pipeline = predict_pipeline(source, lsd_model, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
+pipeline = predict_pipeline(source, mtlsd_model, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
 total_input_roi, total_output_roi = get_input_output_roi(source, raw, input_size, output_size)
 
 print('request batch')
 predict_request = gp.BatchRequest()
 predict_request.add(raw, total_input_roi.get_end())
-predict_request.add(pred_lsds, total_output_roi.get_end())
+predict_request.add(pred_affs, total_output_roi.get_end())
 
 with gp.build(pipeline):
     batch = pipeline.request_batch(predict_request)

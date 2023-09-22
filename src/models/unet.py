@@ -23,7 +23,7 @@ class WeightedMSELoss(torch.nn.MSELoss):
     
 class MTLSDWeightedMSELoss(torch.nn.MSELoss):
     def __init__(self):
-        super(WeightedMSELoss, self).__init__()
+        super(MTLSDWeightedMSELoss, self).__init__()
 
     def _calc_loss(self, pred, target, weights):
 

@@ -5,7 +5,7 @@ import os
 
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 from src.io.dataloaders import dataloader_zarr3Dpredict
-from src.models.mknet import create_affinity_model, return_input_output_sizes
+from src.models.mknet import mknet
 from src.post.predict import predict_pipeline, get_input_output_roi
 from src.utils.utility_funcs import find_latest_checkpoint
 
@@ -41,14 +41,16 @@ print('creating val data source')
 source  = dataloader_zarr3Dpredict(raw, validation_path)
 
 print('creating model')
-model_aff  = create_affinity_model(num_fmaps, fmap_inc_factor, downsample_factors)
-input_size, output_size = return_input_output_sizes(input_shape, voxel_size, model_aff)
+aff_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
+aff_model.create_affinity_model()
+input_size, output_size = aff_model.return_input_output_sizes(input_shape, voxel_size)
+aff_model = aff_model.get_model()
 
 print('creating predict pipeline')
 pred_outs = {0: pred_affs}
 out_dir = config["out_directory"]
 checkpoint = find_latest_checkpoint(out_dir + "/checkpoints")
-pipeline = predict_pipeline(source, model_aff, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
+pipeline = predict_pipeline(source, aff_model, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
 total_input_roi, total_output_roi = get_input_output_roi(source, raw, input_size, output_size)
 
 

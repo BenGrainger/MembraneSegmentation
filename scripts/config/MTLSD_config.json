@@ -1,0 +1,12 @@
+{
+    "parent_dir":  "U://users/beng/automatic_segmentation/LSD/data3D",
+    "data_dir_list": {"data1": "trainA.zarr","data2": "trainB.zarr"},
+    "validation_dir": "val.zarr",
+    "out_directory":  "U://users/beng/models/mtlsd/test",
+    "zxy": [84, 268, 268],
+    "voxel_dimensions": [4, 4, 40],
+    "in_channels": 1,
+    "num_fmaps": 12,
+    "fmap_inc_factor": 6,
+    "downsample_factors": [2, 2, 3]
+  }
