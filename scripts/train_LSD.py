@@ -1,4 +1,5 @@
 import gunpowder as gp
+import os
 
 from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
 from MembraneSegmentation.pre.pipeline import preprocessing_pipeline
@@ -7,19 +8,19 @@ from MembraneSegmentation.post.train import train
 from MembraneSegmentation.utils.script_setup import ScriptSetup, check_folder_exists
 
 print('loading config')
-config_path = r'config/LSD_config.json'
+config_path = r'config/LSD/LSD_config.json'
 
 script = ScriptSetup(config_path)
 script.load_script()
 config = script.return_config()
-logger = script.return_logger()
+logging = script.return_logger()
 out_dir = script.return_out_dir()
-
+root = script.return_root()
 
 logging.info('establishing parameters')
-parent_dir = config['parent_dir'] 
-data_dir_list = config["data_dir_list"]
-data_dir_list = [i for i in data_dir_list.values()]
+data_dir = os.path.join(root, config['data_dir'])
+data_list = config["data_list"]
+data_list = [i for i in data_list.values()]
 
 # Array keys for gunpowder interface
 raw = gp.ArrayKey('RAW')
@@ -52,7 +53,7 @@ check_folder_exists(log_dir)
 batch_dict = {'RAW': raw, 'LABELS': labels, 'GT_LSDS': gt_lsds, 'LSDS_WEIGHTS': lsds_weights, 'PRED_LSDS': pred_lsds}
 
 logging.info('creating data source')
-sources  = dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list)
+sources  = dataloader_zarrmultiplesources3D(raw, labels, data_dir, data_list)
 
 logging.info('creating data pipeline')
 pipeline = preprocessing_pipeline(sources, raw, labels, None)

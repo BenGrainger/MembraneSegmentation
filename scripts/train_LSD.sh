@@ -17,6 +17,5 @@ module load miniconda/4.9.2
 echo "loading cuda"
 module load cuda/12.0
 echo "initializing environment"
-conda activate gunpowder
 echo "starting script"
 python3 train_LSD.py

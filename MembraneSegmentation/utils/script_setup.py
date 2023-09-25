@@ -24,7 +24,7 @@ def check_folder_exists(directory):
 
         try:
             # Create the folder if it doesn't exist
-            #os.makedirs(directory)
+            os.makedirs(directory)
             print(f"Folder '{directory}' created successfully.")
 
         except OSError as e:
@@ -34,22 +34,23 @@ def check_folder_exists(directory):
 
 
 class ScriptSetup():
-    def __init__(self, config_path, logger=None, out_dir=None):
+    def __init__(self, config, logger=None, out_dir=None, root=None):
 
-        self.config_path = config_path
+        self.config = config
         self.logger = logger
         self.out_dir = out_dir
+        self.root = root
     
     def load_script(self):
         
-        root = get_project_root()
+        self.root = get_project_root()
 
-        with open(self.config_path, 'r') as config_file:
-            config = json.load(config_file)
+        with open(self.config, 'r') as config_file:
+            self.config = json.load(config_file)
 
-        self.out_dir = config["out_directory"]
+        self.out_dir = self.config["out_directory"]
 
-        self.out_dir = os.path.join(root, self.out_dir)
+        self.out_dir = os.path.join(self.root, self.out_dir)
 
         date = datetime.datetime.now()
         date_string = date.strftime("%G%m%d")
@@ -61,7 +62,8 @@ class ScriptSetup():
         # Create and configure logger
         logging.basicConfig(filename=self.out_dir+ "/" + "logging.log",
                             format='%(asctime)s %(message)s',
-                            filemode='w')
+                            filemode='w',
+                            level=logging.INFO)
         
         # Creating an object
         self.logger = logging.getLogger()
@@ -74,6 +76,9 @@ class ScriptSetup():
     
     def return_out_dir(self):
         return self.out_dir
+    
+    def return_root(self):
+        return self.root
     
 
 
