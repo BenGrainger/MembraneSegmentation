@@ -3,10 +3,10 @@ import gunpowder as gp
 import sys
 sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 
-from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.pipeline import create_affinity_preprocess_pipeline
-from src.models.mknet import create_affinity_model, return_input_output_sizes
-from src.post.train import load_affinity_model, gunpowder_train
+from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
+from MembraneSegmentation.pre.pipeline import create_affinity_preprocess_pipeline
+from MembraneSegmentation.models.mknet import create_affinity_model, return_input_output_sizes
+from MembraneSegmentation.post.train import load_affinity_model, gunpowder_train
 
 # Array keys for gunpowder interface
 raw = gp.ArrayKey('RAW')

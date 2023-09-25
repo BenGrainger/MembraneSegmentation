@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from src.pre.local_shape_descriptor import LsdExtractor
+from MembraneSegmentation.pre.local_shape_descriptor import LsdExtractor
 from gunpowder import BatchFilter, Array, BatchRequest, Batch
 import logging
 import numpy as np

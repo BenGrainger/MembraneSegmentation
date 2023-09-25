@@ -1,13 +1,11 @@
 import gunpowder as gp
-import sys
 import json
 import os
 
-sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
-from src.io.dataloaders import dataloader_zarr3Dpredict
-from src.models.mknet import mknet
-from src.post.predict import predict_pipeline, get_input_output_roi
-from src.utils.utility_funcs import find_latest_checkpoint
+from MembraneSegmentation.io.dataloaders import dataloader_zarr3Dpredict
+from MembraneSegmentation.models.mknet import mknet
+from MembraneSegmentation.post.predict import predict_pipeline, get_input_output_roi
+from MembraneSegmentation.utils.utility_funcs import find_latest_checkpoint
 
 print('loading config')
 config_path = 'config/affinities_config.json'
