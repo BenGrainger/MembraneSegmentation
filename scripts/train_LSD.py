@@ -1,18 +1,22 @@
+#%%
 import gunpowder as gp
-import json
-import os
 
 from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
 from MembraneSegmentation.pre.pipeline import preprocessing_pipeline
 from MembraneSegmentation.models.mknet import mknet
 from MembraneSegmentation.post.train import train
-
+from MembraneSegmentation.utils.script_setup import ScriptSetup, check_folder_exists
 
 print('loading config')
-config_path = r'ceph/zoo/users/beng/config_files/LSD20230922.json'
+config_path = r'config_files/LSD_config.json'
 
-with open(config_path, 'r') as config_file:
-    config = json.load(config_file)
+script = ScriptSetup(config_path)
+script.load_script()
+config = script.return_config
+logger = script.return_logger
+out_dir = script.return_out_dir
+
+#%%
 
 print('establishing parameters')
 parent_dir = config['parent_dir'] 
@@ -40,20 +44,8 @@ ds1, ds2, ds3 = config["downsample_factors"]
 downsample_factors=[(1,ds1,ds1),(1,ds2,ds2),(1,ds3,ds3)] # 1 in the z due to datasets being non isotropic in z
 
 # model load + save locations
-out_dir = config["out_directory"]
 checkpoint_basename = out_dir + "/checkpoints/chkp"
 log_dir = out_dir + "/log"
-
-def check_folder_exists(directory):
-    if not os.path.exists(directory):
-        try:
-            # Create the folder if it doesn't exist
-            os.makedirs(directory)
-            print(f"Folder '{directory}' created successfully.")
-        except OSError as e:
-            print(f"Error creating folder '{directory}': {e}")
-    else:
-        print(f"Folder '{directory}' already exists.")
 
 check_folder_exists(out_dir)
 check_folder_exists(out_dir + "/checkpoints")
@@ -96,3 +88,5 @@ train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=3
 
 
 
+
+# %%

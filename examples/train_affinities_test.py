@@ -1,7 +1,5 @@
 #%%
 import gunpowder as gp
-import sys
-sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
 
 from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
 from MembraneSegmentation.pre.pipeline import create_affinity_preprocess_pipeline
