@@ -1,0 +1,8 @@
+LICENSE
+README.md
+setup.py
+MembraneSegmentation.egg-info/PKG-INFO
+MembraneSegmentation.egg-info/SOURCES.txt
+MembraneSegmentation.egg-info/dependency_links.txt
+MembraneSegmentation.egg-info/top_level.txt
+test/test.py
