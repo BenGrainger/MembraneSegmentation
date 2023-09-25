@@ -1,13 +1,11 @@
 import gunpowder as gp
-import sys
 import json
 import os
 
-sys.path.append(r'ceph/zoo/users/beng/MembraneSegmentation')
-from src.io.dataloaders import dataloader_zarrmultiplesources3D
-from src.pre.pipeline import preprocessing_pipeline
-from src.models.mknet import mknet
-from src.post.train import train
+from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
+from MembraneSegmentation.pre.pipeline import preprocessing_pipeline
+from MembraneSegmentation.models.mknet import mknet
+from MembraneSegmentation.post.train import train
 
 
 print('loading config')

@@ -1,9 +1,9 @@
 import gunpowder as gp
-from src.pre.add_local_shape_descriptor import AddLocalShapeDescriptor
+from MembraneSegmentation.pre.add_local_shape_descriptor import AddLocalShapeDescriptor
 import math
 from gunpowder.torch import Train
 import torch
-from src.models.unet import WeightedMSELoss, MTLSDWeightedMSELoss
+from MembraneSegmentation.models.unet import WeightedMSELoss, MTLSDWeightedMSELoss
 
 class preprocessing_pipeline(object):
     def __init__(self, source, raw, labels, pipeline):

@@ -1,6 +1,6 @@
 import gunpowder as gp
 from tqdm import tqdm
-from src.utils.utility_funcs import imshow
+from MembraneSegmentation.utils.utility_funcs import imshow
 
 class train(object):
     def __init__(self, request, pipeline, batch_keys, voxel_size):

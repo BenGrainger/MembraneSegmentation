@@ -1,5 +1,5 @@
 import torch
-from src.models.unet import UNet, ConvPass
+from MembraneSegmentation.models.unet import UNet, ConvPass
 import gunpowder as gp
 
 
