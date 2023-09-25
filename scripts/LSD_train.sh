@@ -18,4 +18,4 @@ echo "loading cuda"
 module load cuda/12.0
 echo "initializing environment"
 echo "starting script"
-python3 train_LSD.py
+python3 LSD_train.py
