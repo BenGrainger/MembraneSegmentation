@@ -3,7 +3,7 @@ import sys
 import json
 import os
 
-sys.path.append(r'C://Users/Crab_workstation/Documents/GitHub/MembraneSegmentation')
+sys.path.append(r'ceph/zoo/users/beng/MembraneSegmentation')
 from src.io.dataloaders import dataloader_zarrmultiplesources3D
 from src.pre.pipeline import preprocessing_pipeline
 from src.models.mknet import mknet
@@ -11,7 +11,7 @@ from src.post.train import train
 
 
 print('loading config')
-config_path = 'config/LSD_config.json'
+config_path = r'ceph/zoo/users/beng/config_files/LSD20230922.json'
 
 with open(config_path, 'r') as config_file:
     config = json.load(config_file)
@@ -94,7 +94,7 @@ pipeline.add_model(lsd_model, raw, outputs, loss_inputs, checkpoint_basename, lo
 pipeline = pipeline.get_pipeline()
 
 print('train model')
-train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10, test_training=False, show_every=1)
+train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=30000, test_training=False)
 
 
 
