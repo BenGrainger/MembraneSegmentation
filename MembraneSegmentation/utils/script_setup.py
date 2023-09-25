@@ -34,9 +34,11 @@ def check_folder_exists(directory):
 
 
 class ScriptSetup():
-    def __init__(self, config_path):
+    def __init__(self, config_path, logger=None, out_dir=None):
 
         self.config_path = config_path
+        self.logger = logger
+        self.out_dir = out_dir
     
     def load_script(self):
         
@@ -45,33 +47,33 @@ class ScriptSetup():
         with open(self.config_path, 'r') as config_file:
             config = json.load(config_file)
 
-        out_dir = config["out_directory"]
+        self.out_dir = config["out_directory"]
 
-        out_dir = os.path.join(root, out_dir)
+        self.out_dir = os.path.join(root, self.out_dir)
 
         date = datetime.datetime.now()
         date_string = date.strftime("%G%m%d")
 
-        logging_loc = os.path.join(out_dir, date_string)
+        self.out_dir = os.path.join(self.out_dir, date_string)
 
-        check_folder_exists(logging_loc)
+        check_folder_exists(self.out_dir)
 
         # Create and configure logger
-        logging.basicConfig(filename=out_dir+ "/" + "logging.log",
+        logging.basicConfig(filename=self.out_dir+ "/" + "logging.log",
                             format='%(asctime)s %(message)s',
                             filemode='w')
         
         # Creating an object
-        logger = logging.getLogger()
+        self.logger = logging.getLogger()
 
     def return_logger(self):
-        return logger
+        return self.logger
     
     def return_config(self):
-        return config
+        return self.config
     
     def return_out_dir(self):
-        return out_dir
+        return self.out_dir
     
 
 

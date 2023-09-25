@@ -1,4 +1,3 @@
-#%%
 import gunpowder as gp
 
 from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
@@ -8,7 +7,7 @@ from MembraneSegmentation.post.train import train
 from MembraneSegmentation.utils.script_setup import ScriptSetup, check_folder_exists
 
 print('loading config')
-config_path = r'config_files/LSD_config.json'
+config_path = r'config/LSD_config.json'
 
 script = ScriptSetup(config_path)
 script.load_script()
@@ -16,7 +15,6 @@ config = script.return_config
 logger = script.return_logger
 out_dir = script.return_out_dir
 
-#%%
 
 print('establishing parameters')
 parent_dir = config['parent_dir'] 
