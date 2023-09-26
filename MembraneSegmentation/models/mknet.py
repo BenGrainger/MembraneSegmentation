@@ -68,7 +68,7 @@ class mknet(object):
     def create_ACLSD_model(self):
         self.create_model(10, 3)
 
-    def create_ACLSD_model(self):
+    def create_ACRLSD_model(self):
         self.create_model(11, 3)
 
     def return_input_output_sizes(self, input_shape, voxel_size):
