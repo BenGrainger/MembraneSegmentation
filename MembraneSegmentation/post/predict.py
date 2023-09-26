@@ -25,7 +25,7 @@ def get_input_output_roi(source, raw, input_size, output_size):
 
 
 class predict_pipeline(object):
-    def __init__(self, source, model, raw, pred_outs, input_size, output_size, checkpoint):
+    def __init__(self, source, model, inputs, pred_outs, input_size, output_size, checkpoint):
         """ create a predict pipeline
         Args:
 
@@ -33,7 +33,7 @@ class predict_pipeline(object):
 
             model: pytorch model
 
-            raw: (gp.Arraykey)
+            inputs: (dict) dictionary of iterated predicted gp.Arraykeys placeholders depending on the model e.g. {0: raw}
 
             pred_outs: (dict) dictionary of iterated predicted gp.Arraykeys placeholders depending on the model e.g. {0: pred_lsds, 1; pred_affs}
 
@@ -43,7 +43,7 @@ class predict_pipeline(object):
         """
         self.source = source
         self.model = model
-        self.raw = raw
+        self.inputs = inputs
         self.pred_outs = pred_outs
         self.checkpoint = checkpoint
         self.input_size = input_size
@@ -54,7 +54,8 @@ class predict_pipeline(object):
         # request prediction batch
         scan_request = gp.BatchRequest()
 
-        scan_request.add(self.raw, self.input_size)
+        for i in self.inputs.values():
+            scan_request.add(i, self.input_size)
 
         for i in self.pred_outs.values():
             scan_request.add(i, self.output_size)
@@ -68,11 +69,11 @@ class predict_pipeline(object):
         scan = gp.Scan(scan_request)
 
         pipeline = self.source
-        pipeline += gp.Normalize(self.raw)
+        pipeline += gp.Normalize(self.inputs.values()[0])
 
         # raw shape = h,w
 
-        pipeline += gp.Unsqueeze([self.raw])
+        pipeline += gp.Unsqueeze([self.inputs.values()[0]])
 
         # raw shape = c,h,w
 
@@ -82,12 +83,11 @@ class predict_pipeline(object):
 
         pipeline += predict
         pipeline += scan
-        pipeline += gp.Squeeze([self.raw])
 
         # raw shape = c,h,w
         # pred shape = b,c,h,w
 
-        squeeze_inputs = [self.raw] + [i for i in self.pred_outs.values()]
+        squeeze_inputs = [i for i in self.inputs.values()] + [i for i in self.pred_outs.values()]
         pipeline += gp.Squeeze(squeeze_inputs)
 
         # raw shape = h,w
@@ -99,9 +99,7 @@ class predict_pipeline(object):
         predict = Predict(
             model=self.model,
             checkpoint=self.checkpoint,
-            inputs = {
-                    'input': self.raw
-            },
+            inputs = self.inputs,
             outputs = self.pred_outs)
         
         return predict

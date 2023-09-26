@@ -9,7 +9,7 @@ from MembraneSegmentation.utils.utility_funcs import find_latest_checkpoint
 from MembraneSegmentation.utils.script_setup import ScriptSetup
 
 print('loading config')
-config_path = r'config/LSD/LSD_config.json'
+config_path = r'config/ACRLSD/ACRLSD_config.json'
 
 script = ScriptSetup(config_path)
 script.load_script()
@@ -23,8 +23,9 @@ validation_dir = config["validation_dir"]
 validation_path = os.path.join(data_dir, validation_dir)
 
 # Array keys for gunpowder interface
-raw = gp.ArrayKey('RAW')
-pred_lsds = gp.ArrayKey('PRED_LSDS')
+pretrained_lsd = gp.ArrayKey('PRETRAINED_LSD')
+raw = ArrayKey('RAW')
+pred_affs = gp.ArrayKey('PRED_AFFS')
 
 # data parameters
 z, x, y = config["zxy"]
@@ -40,25 +41,29 @@ ds1, ds2, ds3 = config["downsample_factors"]
 downsample_factors=[(1,ds1,ds1),(1,ds2,ds2),(1,ds3,ds3)] # 1 in the z due to datasets being non isotropic in z
 
 print('creating val data source')
-source  = dataloader_zarr3Dpredict(raw, validation_path)
+source = dataloader_zarr3Dpredict_autocontext(pretrained_lsd, validation_path)
 
 print('creating model')
-lsd_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
-lsd_model.create_LSD_model()
-input_size, output_size = lsd_model.return_input_output_sizes(input_shape, voxel_size)
-lsd_model = lsd_model.get_model()
+acrlsd_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
+acrlsd_model.create_ACRLSD_model()
+input_size, output_size = aclsd_model.return_input_output_sizes(input_shape, voxel_size)
+acrlsd_model = acrlsd_model.get_model()
 
 print('creating predict pipeline')
-pred_outs = {0: pred_lsds}
+pred_outs = {0: pred_affs}
+inputs = {0: raw, 1: pretrained_lsd}
 checkpoint = find_latest_checkpoint(out_dir + "/checkpoints")
-pipeline = predict_pipeline(source, lsd_model, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
-total_input_roi, total_output_roi = get_input_output_roi(source, raw, input_size, output_size)
+pipeline = predict_pipeline(source, acrlsd_model, inputs, pred_outs, input_size, output_size, checkpoint).create_pipeline()
+total_input_roi, total_output_roi = get_input_output_roi(source, pretrained_lsd, input_size, output_size)
+
 
 print('request batch')
 predict_request = gp.BatchRequest()
+predict_request.add(pretrained_lsd, total_input_roi.get_end())
 predict_request.add(raw, total_input_roi.get_end())
-predict_request.add(pred_lsds, total_output_roi.get_end())
+predict_request.add(pred_affs, total_output_roi.get_end())
 
 with gp.build(pipeline):
     batch = pipeline.request_batch(predict_request)
+
 

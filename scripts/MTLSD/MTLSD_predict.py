@@ -49,8 +49,10 @@ input_size, output_size = mtlsd_model.return_input_output_sizes(input_shape, vox
 
 print('creating predict pipeline')
 out_dir = config["out_directory"]
+pred_outs = {0: pred_lsds, 1: pred_outs}
+inputs = {0: raw}
 checkpoint = find_latest_checkpoint(out_dir + "/checkpoints")
-pipeline = predict_pipeline(source, mtlsd_model, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
+pipeline = predict_pipeline(source, mtlsd_model, inputs, pred_outs, input_size, output_size, checkpoint).create_pipeline()
 total_input_roi, total_output_roi = get_input_output_roi(source, raw, input_size, output_size)
 
 print('request batch')

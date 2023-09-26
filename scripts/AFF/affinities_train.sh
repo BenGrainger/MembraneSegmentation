@@ -4,7 +4,7 @@
 #SBATCH --exclude=gpu-sr670-20
 #SBATCH -N 1   # number of nodes
 #SBATCH --mem 120G # memory pool for all cores
-#SBATCH --gres gpu:rtx5000:1
+#SBATCH --gres gpu:a4500:1
 #SBATCH -t 15-0:0 # time (D-HH:MM)
 #SBATCH -o afftrain.out
 #SBATCH -e afftrain.err
@@ -18,4 +18,4 @@ echo "loading cuda"
 module load cuda/12.0
 echo "initializing environment"
 echo "starting script"
-python3 affinties_train.py
+python3 affinities_train.py

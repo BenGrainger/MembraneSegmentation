@@ -114,7 +114,7 @@ class preprocessing_pipeline(object):
         self.pipeline += gp.Stack(1)
         
 
-    def add_model(self, model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10, MTLSD=False):
+    def add_model(self, model, inputs, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10, MTLSD=False, ACLRSD=False):
         """ load model into the pipeline. Each iteration of pipeline will lead to a successive training step.
         Args:
 
@@ -122,7 +122,7 @@ class preprocessing_pipeline(object):
 
             model: pytorch model
 
-            raw: (gp.Arraykey)
+            inputs: (list), e.g [raw, pretrained_lsd]
 
             outputs: (list) converted to this format e.g. outputs={0: pred_lsds}
 
@@ -151,14 +151,23 @@ class preprocessing_pipeline(object):
         else:
             loss = WeightedMSELoss()
 
+        if ACRLSD:
+            inputs={
+                    0: inputs[0],
+                    1: inputs[1]
+                }
+        else:
+            inputs={
+                    'input': inputs[0]
+                }
+
+
 
         self.pipeline += Train(
                 model,
                 loss=loss,
                 optimizer = torch.optim.Adam(model.parameters(),lr=0.5e-4,betas=(0.95,0.999)),
-                inputs={
-                    'input': raw
-                },
+                inputs=inputs,
                 outputs=create_dict(outputs),
                 loss_inputs=create_dict(loss_inputs),
                 checkpoint_basename=checkpoint_basename,

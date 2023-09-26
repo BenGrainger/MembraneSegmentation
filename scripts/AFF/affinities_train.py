@@ -9,7 +9,7 @@ from MembraneSegmentation.post.train import train
 from MembraneSegmentation.utils.script_setup import ScriptSetup, check_folder_exists
 
 print('loading config')
-config_path = r'config/affinities/affinities_config.json'
+config_path = r'config/Affinities/Affinities_config.json'
 
 script = ScriptSetup(config_path)
 script.load_script()
@@ -84,4 +84,4 @@ pipeline.add_model(aff_model, raw, outputs, loss_inputs, checkpoint_basename, lo
 pipeline = pipeline.get_pipeline()
 
 logging.info('train model')
-train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10000, test_training=False, show_every=1)
+train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=30000, test_training=False, show_every=1)
