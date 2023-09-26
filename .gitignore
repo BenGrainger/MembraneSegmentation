@@ -1,6 +1,9 @@
 
-scripts/mtlsdtrain.err
-scripts/mtlsdtrain.out
+
 *.err
 *.out
-scripts/lsdtrain.err
+MembraneSegmentation.egg-info
+MembraneSegmentation.egg-info/dependency_links.txt
+MembraneSegmentation.egg-info/PKG-INFO
+MembraneSegmentation.egg-info/SOURCES.txt
+MembraneSegmentation.egg-info/top_level.txt

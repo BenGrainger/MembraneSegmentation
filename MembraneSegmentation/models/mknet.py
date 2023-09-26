@@ -65,6 +65,9 @@ class mknet(object):
     def create_LSD_model(self):
         self.create_model(1, 10)
 
+    def create_ACLSD_model(self):
+        self.create_model(10, 3)
+
     def return_input_output_sizes(self, input_shape, voxel_size):
         """ returns the input and output size of the model in gp.Coordinates. Used to request/specify batches/arrays of certain sizes
         Args:

@@ -108,9 +108,11 @@ class preprocessing_pipeline(object):
             downsample=2)
 
 
+
     def add_final_prepprocess_pipeline(self):
         self.pipeline += gp.Unsqueeze([self.raw])
         self.pipeline += gp.Stack(1)
+        
 
     def add_model(self, model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10, MTLSD=False):
         """ load model into the pipeline. Each iteration of pipeline will lead to a successive training step.
