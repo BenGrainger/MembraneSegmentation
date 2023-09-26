@@ -6,17 +6,21 @@ from MembraneSegmentation.io.dataloaders import dataloader_zarr3Dpredict
 from MembraneSegmentation.models.mknet import mknet
 from MembraneSegmentation.post.predict import predict_pipeline, get_input_output_roi
 from MembraneSegmentation.utils.utility_funcs import find_latest_checkpoint
+from MembraneSegmentation.utils.script_setup import ScriptSetup
 
 print('loading config')
-config_path = 'config/affinities_config.json'
+config_path = r'config/affinities/affinities_config.json'
 
-with open(config_path, 'r') as config_file:
-    config = json.load(config_file)
+script = ScriptSetup(config_path)
+script.load_script()
+config = script.return_config()
+out_dir = script.return_out_dir()
+root = script.return_root()
 
 print('establishing parameters')
-parent_dir = config['parent_dir'] 
+data_dir = os.path.join(root, config['data_dir'])
 validation_dir = config["validation_dir"]
-validation_path = os.path.join(parent_dir, validation_dir)
+validation_path = os.path.join(data_dir, validation_dir)
 
 # Array keys for gunpowder interface
 raw = gp.ArrayKey('RAW')

@@ -6,17 +6,22 @@ from MembraneSegmentation.io.dataloaders import dataloader_zarrmultiplesources3D
 from MembraneSegmentation.pre.pipeline import preprocessing_pipeline
 from MembraneSegmentation.models.mknet import mknet
 from MembraneSegmentation.post.train import train
+from MembraneSegmentation.utils.script_setup import ScriptSetup, check_folder_exists
 
 print('loading config')
-config_path = 'config/affinities_config.json'
+config_path = r'config/affinities/affinities_config.json'
 
-with open(config_path, 'r') as config_file:
-    config = json.load(config_file)
+script = ScriptSetup(config_path)
+script.load_script()
+config = script.return_config()
+logging = script.return_logger()
+out_dir = script.return_out_dir()
+root = script.return_root()
 
-print('establishing parameters')
-parent_dir = config['parent_dir'] 
-data_dir_list = config["data_dir_list"]
-data_dir_list = [i for i in data_dir_list.values()]
+logging.info('establishing parameters')
+data_dir = os.path.join(root, config['data_dir'])
+data_list = config["data_list"]
+data_list = [i for i in data_list.values()]
 
 # Array keys for gunpowder interface
 raw = gp.ArrayKey('RAW')
@@ -43,39 +48,28 @@ out_dir = config["out_directory"]
 checkpoint_basename = out_dir + "/checkpoints/chkp"
 log_dir = out_dir + "/log"
 
-def check_folder_exists(directory):
-    if not os.path.exists(directory):
-        try:
-            # Create the folder if it doesn't exist
-            os.makedirs(directory)
-            print(f"Folder '{directory}' created successfully.")
-        except OSError as e:
-            print(f"Error creating folder '{directory}': {e}")
-    else:
-        print(f"Folder '{directory}' already exists.")
-
 check_folder_exists(out_dir)
 check_folder_exists(out_dir + "/checkpoints")
 check_folder_exists(log_dir)
 
 batch_dict = {'RAW': raw, 'LABELS': labels, 'GT_AFFS': gt_affs, 'AFFS_WEIGHTS': affs_weights, 'PRED_AFFS': pred_affs}
 
-print('creating data source')
-sources = dataloader_zarrmultiplesources3D(raw, labels, parent_dir, data_dir_list)
+logging.info('creating data source')
+sources = dataloader_zarrmultiplesources3D(raw, labels, data_dir, data_list)
 
-print('creating data pipeline')
+logging.info('creating data pipeline')
 pipeline = preprocessing_pipeline(sources, raw, labels, pipeline=None)
 pipeline.create_pipeline()
 pipeline.add_affinity_pipeline(gt_affs, affs_weights)
 pipeline.add_final_prepprocess_pipeline()
 
-print('creating model')
+logging.info('creating model')
 aff_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
 aff_model.create_affinity_model()
 input_size, output_size = aff_model.return_input_output_sizes(input_shape, voxel_size)
 aff_model = aff_model.get_model()
 
-print('request batch')
+logging.info('request batch')
 request = gp.BatchRequest()
 request.add(raw, input_size)
 request.add(labels, output_size)
@@ -83,12 +77,12 @@ request.add(gt_affs, output_size)
 request.add(affs_weights, output_size)
 request.add(pred_affs, output_size)
 
-print('load model into pipeline')
+logging.info('load model into pipeline')
 outputs = [pred_affs]
 loss_inputs = [pred_affs, gt_affs, affs_weights]
-pipeline.add_model(aff_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1, log_every=1)
+pipeline.add_model(aff_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10)
 
 pipeline = pipeline.get_pipeline()
 
-print('train model')
-train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10, test_training=False, show_every=1)
+logging.info('train model')
+train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10000, test_training=False, show_every=1)

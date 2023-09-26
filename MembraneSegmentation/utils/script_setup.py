@@ -59,16 +59,14 @@ class ScriptSetup():
 
         check_folder_exists(self.out_dir)
 
-        # Create and configure logger
+    def return_logger(self):
+
         logging.basicConfig(filename=self.out_dir+ "/" + "logging.log",
                             format='%(asctime)s %(message)s',
                             filemode='w',
                             level=logging.INFO)
         
-        # Creating an object
         self.logger = logging.getLogger()
-
-    def return_logger(self):
         return self.logger
     
     def return_config(self):

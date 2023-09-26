@@ -78,7 +78,7 @@ request.add(pred_lsds, output_size)
 logging.info('load model into pipeline')
 outputs = [pred_lsds]
 loss_inputs = [pred_lsds, gt_lsds, lsds_weights]
-pipeline.add_model(lsd_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1, log_every=1)
+pipeline.add_model(lsd_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10)
 
 pipeline = pipeline.get_pipeline()
 
