@@ -50,7 +50,6 @@ lsd_model = lsd_model.get_model()
 
 print('creating predict pipeline')
 pred_outs = {0: pred_lsds}
-out_dir = config["out_directory"]
 checkpoint = find_latest_checkpoint(out_dir + "/checkpoints")
 pipeline = predict_pipeline(source, lsd_model, raw, pred_outs, input_size, output_size, checkpoint).create_pipeline()
 total_input_roi, total_output_roi = get_input_output_roi(source, raw, input_size, output_size)

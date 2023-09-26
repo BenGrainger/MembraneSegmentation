@@ -44,7 +44,6 @@ ds1, ds2, ds3 = config["downsample_factors"]
 downsample_factors=[(1,ds1,ds1),(1,ds2,ds2),(1,ds3,ds3)] # 1 in the z due to datasets being non isotropic in z
 
 # model load + save locations
-out_dir = config["out_directory"]
 checkpoint_basename = out_dir + "/checkpoints/chkp"
 log_dir = out_dir + "/log"
 
