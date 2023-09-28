@@ -23,9 +23,9 @@ data_list = config["data_list"]
 data_list = [i for i in data_list.values()]
 
 # Array keys for gunpowder interface
-raw = ArrayKey('RAW')
-labels = ArrayKey('GT_LABELS')
-pretrained_lsd = ArrayKey('PRETRAINED_LSD')
+raw = gp.ArrayKey('RAW')
+labels = gp.ArrayKey('GT_LABELS')
+pretrained_lsd = gp.ArrayKey('PRETRAINED_LSD')
 gt_affs = gp.ArrayKey('GT_AFFS')
 affs_weights = gp.ArrayKey('AFFS_WEIGHTS')
 pred_affs = gp.ArrayKey('PRED_AFFS')
@@ -65,7 +65,7 @@ pipeline.add_final_prepprocess_pipeline()
 logging.info('creating model')
 aclsd_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
 aclsd_model.create_ACLSD_model()
-input_size, output_size = aclsd_model.return_input_output_sizes(input_shape, voxel_size)
+input_size, output_size = aclsd_model.return_input_output_sizes(input_shape, voxel_size, 10)
 aclsd_model = aclsd_model.get_model()
 
 logging.info('request batch')
@@ -86,3 +86,4 @@ pipeline = pipeline.get_pipeline()
 
 logging.info('train model')
 train(request, pipeline, batch_dict, voxel_size).gunpowder_train(max_iteration=10000, test_training=False, show_every=1)
+

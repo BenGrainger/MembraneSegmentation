@@ -6,7 +6,7 @@ import torch
 from MembraneSegmentation.models.unet import WeightedMSELoss, MTLSDWeightedMSELoss
 
 class preprocessing_pipeline(object):
-    def __init__(self, source, raw, labels, pipeline):
+    def __init__(self, source, raw, labels, pipeline=None):
         """
         Args:
 
@@ -25,34 +25,35 @@ class preprocessing_pipeline(object):
     def get_pipeline(self):
         return self.pipeline
 
-    def create_pipeline(self):
+    def create_pipeline(self, augment=True):
         # randomly choose a sample from our tuple of samples - this is absolutely necessary to be able to get any data!
         
         self.pipeline = self.source
         
         self.pipeline += gp.RandomProvider()
 
-        # add steps to the pipeline
-        #randomly mirror and transpose a batch
-        self.pipeline == gp.SimpleAugment()
+        if augment:
+            # add steps to the pipeline
+            #randomly mirror and transpose a batch
+            self.pipeline == gp.SimpleAugment()
 
-        # elastcally deform the batch
-        self.pipeline += gp.ElasticAugment(
-            [4,40,40],
-            [0,2,2],
-            [0,math.pi/2.0],
-            prob_slip=0.05,
-            prob_shift=0.05,
-            max_misalign=25)
+            # elastcally deform the batch
+            self.pipeline += gp.ElasticAugment(
+                [4,40,40],
+                [0,2,2],
+                [0,math.pi/2.0],
+                prob_slip=0.05,
+                prob_shift=0.05,
+                max_misalign=25)
 
-        # randomly shift and scale the intensities
-        self.pipeline += gp.IntensityAugment(
-            self.raw,
-            scale_min=0.9,
-            scale_max=1.1,
-            shift_min=-0.1,
-            shift_max=0.1,
-            z_section_wise=True)
+            # randomly shift and scale the intensities
+            self.pipeline += gp.IntensityAugment(
+                self.raw,
+                scale_min=0.9,
+                scale_max=1.1,
+                shift_min=-0.1,
+                shift_max=0.1,
+                z_section_wise=True)
         
         # dilate the boundaries between labels
         self.pipeline += gp.GrowBoundary(self.labels, 
@@ -114,7 +115,7 @@ class preprocessing_pipeline(object):
         self.pipeline += gp.Stack(1)
         
 
-    def add_model(self, model, inputs, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10, MTLSD=False, ACLRSD=False):
+    def add_model(self, model, inputs, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10, MTLSD=False, ACRLSD=False):
         """ load model into the pipeline. Each iteration of pipeline will lead to a successive training step.
         Args:
 

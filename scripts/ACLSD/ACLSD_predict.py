@@ -45,7 +45,7 @@ source  = dataloader_zarr3Dpredict(pretrained_lsd, validation_path)
 print('creating model')
 aclsd_model = mknet(num_fmaps, fmap_inc_factor, downsample_factors, model=None)
 aclsd_model.create_ACLSD_model()
-input_size, output_size = aclsd_model.return_input_output_sizes(input_shape, voxel_size)
+input_size, output_size = aclsd_model.return_input_output_sizes(input_shape, voxel_size, 10)
 aclsd_model = aclsd_model.get_model()
 
 print('creating predict pipeline')

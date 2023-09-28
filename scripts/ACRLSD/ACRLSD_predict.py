@@ -24,7 +24,7 @@ validation_path = os.path.join(data_dir, validation_dir)
 
 # Array keys for gunpowder interface
 pretrained_lsd = gp.ArrayKey('PRETRAINED_LSD')
-raw = ArrayKey('RAW')
+raw = gp.ArrayKey('RAW')
 pred_affs = gp.ArrayKey('PRED_AFFS')
 
 # data parameters

@@ -78,8 +78,9 @@ request.add(pred_affs, output_size)
 
 logging.info('load model into pipeline')
 outputs = [pred_affs]
+inputs = [raw]
 loss_inputs = [pred_affs, gt_affs, affs_weights]
-pipeline.add_model(aff_model, raw, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10)
+pipeline.add_model(aff_model, inputs, outputs, loss_inputs, checkpoint_basename, log_dir, save_every=1000, log_every=10)
 
 pipeline = pipeline.get_pipeline()
 

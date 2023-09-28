@@ -71,7 +71,7 @@ class mknet(object):
     def create_ACRLSD_model(self):
         self.create_model(11, 3)
 
-    def return_input_output_sizes(self, input_shape, voxel_size):
+    def return_input_output_sizes(self, input_shape, voxel_size, channels=1):
         """ returns the input and output size of the model in gp.Coordinates. Used to request/specify batches/arrays of certain sizes
         Args:
 
@@ -82,7 +82,7 @@ class mknet(object):
                 model: pytorch model 
 
         """
-        model_input = torch.ones([1, 1, input_shape[0], input_shape[1], input_shape[2]])
+        model_input = torch.ones([1, channels, input_shape[0], input_shape[1], input_shape[2]])
         outputs = self.model(model_input)
         output_shape = gp.Coordinate((outputs.shape[2], outputs.shape[3], outputs.shape[4]))
         input_size = gp.Coordinate(input_shape) * voxel_size
